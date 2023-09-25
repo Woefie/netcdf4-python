@@ -746,6 +746,7 @@ setup(
     name="netCDF4",  # need by GitHub dependency graph
     version=extract_version(netcdf4_src_pyx),
     ext_modules=ext_modules,
+    data_files=['src/netCDF4/_netCDF4.pyi'],
 )
 
 # remove plugin files copied from outside source tree
