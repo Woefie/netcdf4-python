@@ -1,6 +1,8 @@
 from typing import TypeAlias, Literal, Optional, Any
 import numpy as np
 import os
+import datetime
+import cftime
 
 Datatype: TypeAlias = Literal['S1', 'c', 'i1', 'b', 'B', 'u1', 'i2',
                               'h', 's', 'u2', 'i4', 'i', 'l', 'u4',
@@ -75,7 +77,7 @@ class Dataset:
         self,
         varname: str,
         datatype: Datatype | np.dtype | str | CompoundType | VLType,
-        dimensions: tuple(str) = (),
+        dimensions: tuple[str] = (),
         compression: Compression = None,
         zlib: bool = False,
         complevel: Optional[Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]] = 4,
@@ -183,7 +185,7 @@ class Variable:
         grp: Group,
         name: str,
         datatype: Datatype | np.dtype | str | CompoundType | VLType,
-        dimensions: tuple(str) = (),
+        dimensions: tuple[str] = (),
         compression: Compression = None,
         zlib: bool = False,
         complevel: Optional[Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]] = 4,
@@ -212,10 +214,10 @@ class Variable:
     def getncattr(self, name: str, encoding='utf-8'): ...
     def delncattr(self, name: str) -> None: ...
     def filters(self) -> dict: ...
-    def quantization(self): ...
+    def quantization(self) -> int: ...
     def endian(self) -> str: ...
     def chunking(self) -> str | list[int]: ...
-    def get_var_chunk_cache(self) -> tuple(int, int, float): ...
+    def get_var_chunk_cache(self) -> tuple[int, int, float]: ...
 
     def set_var_chunk_cache(
         self,
@@ -300,11 +302,6 @@ class EnumType:
     def __reduce__(self): ...
 
 
-def stringtoarr(string, NUMCHARS, dtype='S'): ...
-def stringtochar(a, encoding='utf-8'): ...
-def chartostring(b, encoding='utf-8'): ...
-
-
 class MFDataset(Dataset):
     ...
 
@@ -349,8 +346,44 @@ class MFTime(_Variable):
 
     def __init__(
         self,
-        time,
+        time: Variable,
         units=None,
         calendar: Literal['standard', 'gregorian'] = None
     ): ...
     def __getitem__(self, elem): ...
+
+
+def stringtoarr(string, NUMCHARS: int, dtype: str = 'S'): ...
+def stringtochar(a, encoding='utf-8'): ...
+def chartostring(b, encoding='utf-8'): ...
+def getlibversion() -> str: ...
+def set_alignment(threshold:int, alignment:int):...
+def get_alignment()->tuple[int,int]:...
+def set_chunk_cache(self,size:int=None,nelems:int=None,preemption:float=None)
+def get_chunk_cache()-> tuple[int,int,float]:...
+
+def date2index(
+    dates: datetime.datetime | cftime.datetime,
+    nctime: MFTime,
+    calendar: Optional[Literal['standard', 'gregorian', 'proleptic_gregorian' 'noleap',
+                               '365_day', '360_day', 'julian', 'all_leap', '366_day']] = None,
+    select: Literal['exact', 'before', 'after', 'nearest'] = 'exact',
+    has_year_zero: Optional[bool] = None): ...
+
+
+def date2num(
+    dates: datetime.datetime | cftime.datetime,
+    units: str,
+    calendar: Optional[Literal['standard', 'gregorian', 'proleptic_gregorian' 'noleap',
+                               '365_day', '360_day', 'julian', 'all_leap', '366_day']] = None,
+    has_year_zero: Optional[bool] = None,
+    longdouble: bool = False): ...
+def num2date(
+    times: Any, 
+    units:str, 
+    calendar:Literal['standard', 'gregorian', 'proleptic_gregorian' 'noleap',
+                        '365_day', '360_day', 'julian', 'all_leap', '366_day']='standard', 
+    only_use_cftime_datetimes:bool=True, 
+    only_use_python_datetimes:bool=False, 
+    has_year_zero:Optional[bool]=None
+    ):... 
