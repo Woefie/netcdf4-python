@@ -3,7 +3,8 @@ import numpy as np
 import os
 
 Datatype: TypeAlias = Literal['S1', 'c', 'i1', 'b', 'B', 'u1', 'i2',
-                              'h', 's', 'u2', 'i4', 'i', 'l', 'u4', 'i8', 'u8', 'f4', 'f', 'f8', 'd']
+                              'h', 's', 'u2', 'i4', 'i', 'l', 'u4',
+                              'i8', 'u8', 'f4', 'f', 'f8', 'd']
 Compression: TypeAlias = Literal['zlib', 'szip', 'zstd', 'blosc_lz',
                                  'blosc_lz4', 'blosc_lz4hc', 'blosc_zlib', 'blosc_zstd']
 AccessMode: TypeAlias = Literal['r', 'w',
