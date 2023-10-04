@@ -45,7 +45,7 @@ class Dataset:
     def createDimension(
         self,
         dimname: str,
-        size: int = None
+        size: Optional[int] = None
     ) -> Dimension: ...
 
     def renameDimension(
