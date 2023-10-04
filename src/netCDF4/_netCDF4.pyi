@@ -377,13 +377,15 @@ def date2num(
     calendar: Optional[Literal['standard', 'gregorian', 'proleptic_gregorian' 'noleap',
                                '365_day', '360_day', 'julian', 'all_leap', '366_day']] = None,
     has_year_zero: Optional[bool] = None,
-    longdouble: bool = False): ...
+    longdouble: bool = False
+): ...
+
 def num2date(
     times: Any, 
-    units:str, 
-    calendar:Literal['standard', 'gregorian', 'proleptic_gregorian' 'noleap',
-                        '365_day', '360_day', 'julian', 'all_leap', '366_day']='standard', 
-    only_use_cftime_datetimes:bool=True, 
-    only_use_python_datetimes:bool=False, 
-    has_year_zero:Optional[bool]=None
-    ):... 
+    units: str, 
+    calendar: Literal['standard', 'gregorian', 'proleptic_gregorian' 'noleap',
+                        '365_day', '360_day', 'julian', 'all_leap', '366_day'] = 'standard', 
+    only_use_cftime_datetimes: bool = True, 
+    only_use_python_datetimes: bool = False, 
+    has_year_zero: Optional[bool] = None
+): ... 
