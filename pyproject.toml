@@ -64,3 +64,4 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "netCDF4.plugins" = ["lib__nc*"]
+netCDF4 = ["_netCDF4.pyi"]
