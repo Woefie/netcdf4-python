@@ -2,7 +2,7 @@ from typing import TypeAlias, Literal, Optional, Any, Tuple
 import numpy.typing as npt
 import os
 import datetime
-import cftime # type: ignore
+import cftime  # type: ignore
 
 Datatype: TypeAlias = Literal['S1', 'c', 'i1', 'b', 'B', 'u1', 'i2',
                               'h', 's', 'u2', 'i4', 'i', 'l', 'u4',
@@ -13,28 +13,74 @@ AccessMode: TypeAlias = Literal['r', 'w',
                                 'r+', 'a', 'x', 'rs', 'ws', 'r+s', 'as']
 Format: TypeAlias = Literal['NETCDF4', 'NETCDF4_CLASSIC', 'NETCDF3_CLASSIC',
                             'NETCDF3_64BIT_OFFSET', 'NETCDF3_64BIT_DATA']
+DiskFormat: TypeAlias = Literal['NETCDF3', 'HDF5', 'HDF4',
+                                'PNETCDF', 'DAP2', 'DAP4', 'UNDEFINED']
+default_fillvals = {#'S1':NC_FILL_CHAR,
+                     'S1':'\0',
+                     'i1':-127,
+                     'u1':255,
+                     'i2':-32767,
+                     'u2':65535,
+                     'i4':-2147483647,
+                     'u4':4294967295,
+                     'i8':-9223372036854775806,
+                     'u8':18446744073709551614,
+                     'f4':9.9692099683868690e+36,
+                     'f8':9.9692099683868690e+36}
 
-__version__:str
-__netcdf4libversion__:str
+__version__: str
+__netcdf4libversion__: str
 __hdf5libversion__: str
-__has_rename_grp__:bool
-__has_nc_inq_path__:bool
-__has_nc_inq_format_extended__:bool
-__has_nc_open_mem__:bool
-__has_nc_create_mem__:bool
-__has_cdf5_format__:bool
-__has_parallel4_support__:bool
-__has_pnetcdf_support__:bool
-__has_quantization_support__:bool
-__has_zstandard_support__:bool
-__has_bzip2_support__:bool
-__has_blosc_support__:bool
-__has_szip_support__:bool
-__has_set_alignment__:bool
+__has_rename_grp__: bool
+__has_nc_inq_path__: bool
+__has_nc_inq_format_extended__: bool
+__has_nc_open_mem__: bool
+__has_nc_create_mem__: bool
+__has_cdf5_format__: bool
+__has_parallel4_support__: bool
+__has_pnetcdf_support__: bool
+__has_quantization_support__: bool
+__has_zstandard_support__: bool
+__has_bzip2_support__: bool
+__has_blosc_support__: bool
+__has_szip_support__: bool
+__has_set_alignment__: bool
+is_native_little: bool
+is_native_big: bool
+default_encoding = 'utf-8'
+unicode_error = 'replace'
 
 
 class Dataset:
     ...
+    @property
+    def groups(self) -> dict[str, Group]: ...
+    @property
+    def dimensions(self) -> dict[str, Dimension]: ...
+    @property
+    def variables(self) -> dict[str, Variable]: ...
+    @property
+    def cmptypes(self) -> dict[str, CompoundType]: ...
+    @property
+    def vltypes(self) -> dict[str, VLType]: ...
+    @property
+    def enumtypes(self) -> dict[str, EnumType]: ...
+    @property
+    def data_model(self) -> Format: ...
+    @property
+    def file_format(self) -> Format: ...
+    @property
+    def disk_format(self) -> DiskFormat: ...
+    @property
+    def parent(self) -> Dataset | None: ...
+    @property
+    def path(self) -> os.PathLike | str: ...
+    @property
+    def keepweakref(self) -> bool: ...
+    @property
+    def _ncstring_attrs__(self) -> bool: ...
+    @property
+    def __orthogonal_indexing__(self) -> bool: ...
 
     def __init__(
         self,
@@ -88,7 +134,7 @@ class Dataset:
         self,
         datatype: npt.DTypeLike,
         datatype_name: str,
-        enum_dict: dict[str,int]
+        enum_dict: dict[str, int]
     ) -> EnumType: ...
 
     def createVariable(
@@ -198,6 +244,25 @@ class Dimension:
 
 
 class Variable:
+    ...
+
+    @property
+    def dimensions(self) -> Tuple[str]: ...
+    @property
+    def dtype(self) -> npt.DTypeLike: ...
+    @property
+    def ndim(self) -> int: ...
+    @property
+    def shape(self) -> Tuple[int]: ...
+    @property
+    def scale(self) -> bool: ...
+    @property
+    def mask(self) -> bool: ...
+    @property
+    def chartostring(self) -> bool: ...
+    @property
+    def always_mask(self) -> bool: ...
+
     def __init__(
         self,
         grp: Group,
@@ -262,11 +327,9 @@ class Variable:
     @property
     def datatype(self) -> CompoundType | VLType | EnumType: ...
     @property
-    def shape(self) -> tuple[int]: ...
-    @property
     def size(self) -> int: ...
     @property
-    def dimensions(self) -> tuple[Dimension]: ...
+    def __orthogonal_indexing__(self) -> bool: ...
 
     def __setitem__(self, elem, data): ...
     def __len__(self) -> int: ...
@@ -281,8 +344,13 @@ class Variable:
 
 class CompoundType:
     ...
-    dtype : npt.DTypeLike
-    name: str
+    @property
+    def dtype(self) -> npt.DTypeLike: ...
+    @property
+    def name(self) -> str: ...
+    @property
+    def dtype_view(self) -> npt.DTypeLike: ...
+
     def __init__(self, grp, datatype, dtype_name, **kwargs): ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
@@ -291,7 +359,11 @@ class CompoundType:
 
 class VLType:
     ...
-
+    @property
+    def dtype(self) -> npt.DTypeLike: ...
+    @property
+    def name(self) -> str: ...
+    
     def __init__(
         self,
         grp: Group,
@@ -307,13 +379,19 @@ class VLType:
 
 class EnumType:
     ...
+    @property
+    def dtype(self) -> npt.DTypeLike: ...
+    @property
+    def name(self) -> str: ...
+    @property
+    def enum_dict(self) -> dict[str, int]: ...
 
     def __init__(
         self,
         grp: Group,
         datatype: npt.DTypeLike,
         dtype_name: str,
-        enum_dict: dict[str,int],
+        enum_dict: dict[str, int],
         **kwargs
     ): ...
 
@@ -379,9 +457,10 @@ def chartostring(b, encoding='utf-8'): ...
 def getlibversion() -> str: ...
 def set_alignment(threshold: int, alignment: int): ...
 def get_alignment() -> tuple[int, int]: ...
-def set_chunk_cache(self, 
-                    size: Optional[int] = None,
-                    nelems: Optional[int] = None, 
+
+
+def set_chunk_cache(size: Optional[int] = None,
+                    nelems: Optional[int] = None,
                     preemption: Optional[float] = None): ...
 
 
