@@ -1,8 +1,8 @@
-from typing import TypeAlias, Literal, Optional, Any
-import numpy as np
+from typing import TypeAlias, Literal, Optional, Any, Tuple
+import numpy.typing as npt
 import os
 import datetime
-import cftime
+import cftime # type: ignore
 
 Datatype: TypeAlias = Literal['S1', 'c', 'i1', 'b', 'B', 'u1', 'i2',
                               'h', 's', 'u2', 'i4', 'i', 'l', 'u4',
@@ -13,6 +13,24 @@ AccessMode: TypeAlias = Literal['r', 'w',
                                 'r+', 'a', 'x', 'rs', 'ws', 'r+s', 'as']
 Format: TypeAlias = Literal['NETCDF4', 'NETCDF4_CLASSIC', 'NETCDF3_CLASSIC',
                             'NETCDF3_64BIT_OFFSET', 'NETCDF3_64BIT_DATA']
+
+__version__:str
+__netcdf4libversion__:str
+__hdf5libversion__: str
+__has_rename_grp__:bool
+__has_nc_inq_path__:bool
+__has_nc_inq_format_extended__:bool
+__has_nc_open_mem__:bool
+__has_nc_create_mem__:bool
+__has_cdf5_format__:bool
+__has_parallel4_support__:bool
+__has_pnetcdf_support__:bool
+__has_quantization_support__:bool
+__has_zstandard_support__:bool
+__has_bzip2_support__:bool
+__has_blosc_support__:bool
+__has_szip_support__:bool
+__has_set_alignment__:bool
 
 
 class Dataset:
@@ -35,8 +53,8 @@ class Dataset:
         **kwargs
     ): ...
 
-    def filepath(self, encoding: str = None) -> None: ...
-    def isopen(self) -> None: ...
+    def filepath(self, encoding: Optional[str] = None) -> str: ...
+    def isopen(self) -> bool: ...
     def close(self) -> bool: ...
     def sync(self) -> None: ...
     def set_fill_on(self) -> None: ...
@@ -56,29 +74,29 @@ class Dataset:
 
     def createCompoundType(
         self,
-        datatype: np.dtype[np.number],
+        datatype: npt.DTypeLike,
         datatype_name: str
     ) -> CompoundType: ...
 
     def createVLType(
         self,
-        datatype: np.dtype[np.number],
+        datatype: npt.DTypeLike,
         datatype_name: str
     ) -> VLType: ...
 
     def createEnumType(
         self,
-        datatype: np.dtype[np.number],
+        datatype: npt.DTypeLike,
         datatype_name: str,
-        enum_dict: dict[str:int]
+        enum_dict: dict[str,int]
     ) -> EnumType: ...
 
     def createVariable(
         self,
         varname: str,
-        datatype: Datatype | np.dtype | str | CompoundType | VLType,
-        dimensions: tuple[str] = (),
-        compression: Compression = None,
+        datatype: Datatype | npt.DTypeLike | str | CompoundType | VLType,
+        dimensions: Tuple[str] | Tuple[()] | str | Dimension = (),
+        compression: Optional[Compression] = None,
         zlib: bool = False,
         complevel: Optional[Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]] = 4,
         shuffle: bool = True,
@@ -130,7 +148,7 @@ class Dataset:
         self,
         coordvars: bool = False,
         data: bool = False,
-        outfile: str = None
+        outfile: Optional[str] = None
     ) -> None | bool: ...
 
     def has_blosc_filter(self) -> bool: ...
@@ -184,9 +202,9 @@ class Variable:
         self,
         grp: Group,
         name: str,
-        datatype: Datatype | np.dtype | str | CompoundType | VLType,
-        dimensions: tuple[str] = (),
-        compression: Compression = None,
+        datatype: Datatype | npt.DTypeLike | str | CompoundType | VLType,
+        dimensions: Tuple[str] | Tuple[()] | str | Dimension = (),
+        compression: Optional[Compression] = None,
         zlib: bool = False,
         complevel: Optional[Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]] = 4,
         shuffle: bool = True,
@@ -221,9 +239,9 @@ class Variable:
 
     def set_var_chunk_cache(
         self,
-        size: int = None,
-        nelems: int = None,
-        preemption: float = None
+        size: Optional[int] = None,
+        nelems: Optional[int] = None,
+        preemption: Optional[float] = None
     ) -> None: ...
 
     def renameAttribute(self, oldname: str, newname: str) -> None: ...
@@ -252,7 +270,7 @@ class Variable:
 
     def __setitem__(self, elem, data): ...
     def __len__(self) -> int: ...
-    def __array__(self) -> np.array: ...
+    def __array__(self) -> npt.ArrayLike: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
     def __delattr__(self, name: str): ...
@@ -263,6 +281,8 @@ class Variable:
 
 class CompoundType:
     ...
+    dtype : npt.DTypeLike
+    name: str
     def __init__(self, grp, datatype, dtype_name, **kwargs): ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
@@ -275,7 +295,7 @@ class VLType:
     def __init__(
         self,
         grp: Group,
-        datatype: np.dtype,
+        datatype: npt.DTypeLike,
         dtype_name: str,
         **kwargs
     ): ...
@@ -291,9 +311,9 @@ class EnumType:
     def __init__(
         self,
         grp: Group,
-        datatype: np.dtype,
+        datatype: npt.DTypeLike,
         dtype_name: str,
-        enum_dict: dict[str:int],
+        enum_dict: dict[str,int],
         **kwargs
     ): ...
 
@@ -311,7 +331,7 @@ class MFDataset(Dataset):
         check: bool = False,
         aggdim: Optional[str] = None,
         exclude: list[str] = [],
-        master_file: str | os.PathLike = None
+        master_file: Optional[str | os.PathLike] = None
     ): ...
 
     def __setattr__(self, name: str, value: Any): ...
@@ -348,7 +368,7 @@ class MFTime(_Variable):
         self,
         time: Variable,
         units=None,
-        calendar: Literal['standard', 'gregorian'] = None
+        calendar: Optional[Literal['standard', 'gregorian']] = None
     ): ...
     def __getitem__(self, elem): ...
 
@@ -357,10 +377,16 @@ def stringtoarr(string, NUMCHARS: int, dtype: str = 'S'): ...
 def stringtochar(a, encoding='utf-8'): ...
 def chartostring(b, encoding='utf-8'): ...
 def getlibversion() -> str: ...
-def set_alignment(threshold:int, alignment:int):...
-def get_alignment()->tuple[int,int]:...
-def set_chunk_cache(self,size:int=None,nelems:int=None,preemption:float=None)
-def get_chunk_cache()-> tuple[int,int,float]:...
+def set_alignment(threshold: int, alignment: int): ...
+def get_alignment() -> tuple[int, int]: ...
+def set_chunk_cache(self, 
+                    size: Optional[int] = None,
+                    nelems: Optional[int] = None, 
+                    preemption: Optional[float] = None): ...
+
+
+def get_chunk_cache() -> tuple[int, int, float]: ...
+
 
 def date2index(
     dates: datetime.datetime | cftime.datetime,
@@ -380,12 +406,13 @@ def date2num(
     longdouble: bool = False
 ): ...
 
+
 def num2date(
-    times: Any, 
-    units: str, 
+    times: Any,
+    units: str,
     calendar: Literal['standard', 'gregorian', 'proleptic_gregorian' 'noleap',
-                        '365_day', '360_day', 'julian', 'all_leap', '366_day'] = 'standard', 
-    only_use_cftime_datetimes: bool = True, 
-    only_use_python_datetimes: bool = False, 
+                      '365_day', '360_day', 'julian', 'all_leap', '366_day'] = 'standard',
+    only_use_cftime_datetimes: bool = True,
+    only_use_python_datetimes: bool = False,
     has_year_zero: Optional[bool] = None
-): ... 
+): ...

@@ -712,7 +712,8 @@ if 'sdist' not in sys.argv[1:] and 'clean' not in sys.argv[1:] and '--version' n
                              libraries=libs,
                              library_dirs=lib_dirs,
                              include_dirs=inc_dirs + ['include'],
-                             runtime_library_dirs=runtime_lib_dirs)]
+                             runtime_library_dirs=runtime_lib_dirs,
+                             package_data = {'netCDF4': ['py.typed','_netCDF4.pyi']})]
     # set language_level directive to 3
     for e in ext_modules:
         e.cython_directives = {'language_level': "3"} #
