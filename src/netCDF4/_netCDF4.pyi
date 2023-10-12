@@ -15,18 +15,7 @@ Format: TypeAlias = Literal['NETCDF4', 'NETCDF4_CLASSIC', 'NETCDF3_CLASSIC',
                             'NETCDF3_64BIT_OFFSET', 'NETCDF3_64BIT_DATA']
 DiskFormat: TypeAlias = Literal['NETCDF3', 'HDF5', 'HDF4',
                                 'PNETCDF', 'DAP2', 'DAP4', 'UNDEFINED']
-default_fillvals = {#'S1':NC_FILL_CHAR,
-                     'S1':'\0',
-                     'i1':-127,
-                     'u1':255,
-                     'i2':-32767,
-                     'u2':65535,
-                     'i4':-2147483647,
-                     'u4':4294967295,
-                     'i8':-9223372036854775806,
-                     'u8':18446744073709551614,
-                     'f4':9.9692099683868690e+36,
-                     'f8':9.9692099683868690e+36}
+default_fillvals: dict[str, int | float]
 
 __version__: str
 __netcdf4libversion__: str
@@ -47,8 +36,8 @@ __has_szip_support__: bool
 __has_set_alignment__: bool
 is_native_little: bool
 is_native_big: bool
-default_encoding = 'utf-8'
-unicode_error = 'replace'
+default_encoding: str
+unicode_error: str
 
 
 class Dataset:
@@ -363,7 +352,7 @@ class VLType:
     def dtype(self) -> npt.DTypeLike: ...
     @property
     def name(self) -> str: ...
-    
+
     def __init__(
         self,
         grp: Group,
