@@ -45,13 +45,16 @@ jobs:
     - name: Install python dependencies via pip
       run: |
         python -m pip install --upgrade pip
-        pip install numpy cython cftime pytest twine wheel check-manifest mpi4py
+        pip install numpy cython cftime pytest twine wheel check-manifest mpi4py mypy
 
     - name: Install netcdf4-python
       run: |
         export PATH=${NETCDF_DIR}/bin:${PATH} 
         export NETCDF_PLUGIN_DIR=${{ github.workspace }}/netcdf-c/plugins/plugindir
-        pip install mypy
         pip install -e . 
+    
     - name: Stubtest
-      run: stubtest netCDF4 --allowlist src/netCDF4/mypy-allowlist
+      run: |
+      export PATH=${NETCDF_DIR}/bin:${PATH} 
+      export NETCDF_PLUGIN_DIR=${{ github.workspace }}/netcdf-c/plugins/plugindir
+      stubtest netCDF4 --allowlist src/netCDF4/mypy-allowlist
