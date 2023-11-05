@@ -55,6 +55,6 @@ jobs:
     
     - name: Stubtest
       run: |
-      export PATH=${NETCDF_DIR}/bin:${PATH} 
-      export NETCDF_PLUGIN_DIR=${{ github.workspace }}/netcdf-c/plugins/plugindir
-      stubtest netCDF4 --allowlist src/netCDF4/mypy-allowlist
+        export PATH=${NETCDF_DIR}/bin:${PATH} 
+        export NETCDF_PLUGIN_DIR=${{ github.workspace }}/netcdf-c/plugins/plugindir
+        stubtest netCDF4 --allowlist src/netCDF4/mypy-allowlist
