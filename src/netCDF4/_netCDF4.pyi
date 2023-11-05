@@ -28,16 +28,28 @@ __has_nc_create_mem__: bool
 __has_cdf5_format__: bool
 __has_parallel4_support__: bool
 __has_pnetcdf_support__: bool
+__has_parallel_support__: bool
 __has_quantization_support__: bool
 __has_zstandard_support__: bool
 __has_bzip2_support__: bool
 __has_blosc_support__: bool
 __has_szip_support__: bool
 __has_set_alignment__: bool
+__has_ncfilter__: bool
 is_native_little: bool
 is_native_big: bool
 default_encoding: str
 unicode_error: str
+
+
+class NetCDF4MissingFeatureException(Exception):
+    ...
+
+    def __init__(
+        self,
+        feature: str,
+        version: str
+    ): ...
 
 
 class Dataset:
